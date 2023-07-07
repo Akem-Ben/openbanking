@@ -106,3 +106,19 @@ export const getTransactionsOfAUser = async(req:Request, res:Response, next:Next
   res.status(500).json({ Error: "Internal Server Error" });
 }
 }
+
+export const deleteTransaction = async(req:Request, res:Response, next:NextFunction) => {
+  try{
+    const transId = req.params.id;
+    const del = await Transaction.destroy({where: {id:transId}})
+    if(!del) return res.status(404).json({message: `Unable to delete`})
+    const allTrans = await Transaction.findAll({})
+    return res.status(200).json({
+      message: `Transaction deleted successfully`,
+      Transactions: allTrans
+    })
+  }catch (error:any){
+    console.log(error.message)
+  res.status(500).json({ Error: "Internal Server Error" });
+}
+}
