@@ -23,10 +23,13 @@ receiver_account_number,
         message: `Account does not exist`
     })
   }
+  if(findAccount.status !== 'active')
+  return res.status(404).json({
+    message: `Account has been deactivated`
+})
 
   let currentAccountBalance = findAccount.account_balance;
   let newAccountBalance = 0;
-
     const newTransaction = await Transaction.create({
         id: idNew,
         amount,
@@ -61,7 +64,7 @@ receiver_account_number,
             findAccount,
             newTransaction
         })
-        
+
     }else{
         return res.status(401).json({transaction_status: 'unsuccessful'})
     }
