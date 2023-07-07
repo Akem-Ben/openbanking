@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../configurations/database";
+import Transaction from './transactions'
 
 export interface AccountAtrributes {
   id: string;
@@ -45,7 +46,8 @@ Account.init(
       },
       account_number: {
         type: DataTypes.NUMBER,
-        allowNull: true,
+        allowNull: false,
+        primaryKey: true,
       },
       bvn: {
         type: DataTypes.NUMBER,
@@ -94,5 +96,9 @@ Account.init(
   }
 
 );
+
+Account.hasMany(Transaction, {foreignKey: 'sender_account_number', as: 'transaction'})
+
+Transaction.belongsTo(Account, {foreignKey: 'sender_account_number', as: 'sender'})
 
 export default Account;

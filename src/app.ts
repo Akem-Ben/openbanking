@@ -5,9 +5,9 @@ import cookieParser from 'cookie-parser';
 import db  from "./configurations/database";
 import accountRoutes from './routes/accountRoutes';
 import dotenv from 'dotenv';
+import transactionRoutes from './routes/transactionRoutes';
 
 dotenv.config()
-
 
 const app = express();
 
@@ -16,6 +16,7 @@ app.use(cors())
 app.use(logger("dev"))
 app.use(cookieParser())
 app.use('/account', accountRoutes)
+app.use('/transaction', transactionRoutes)
 
 async function startApp() {
   try {

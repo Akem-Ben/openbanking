@@ -200,7 +200,7 @@ export const getAccountBalance = async(req:Request, res:Response, next:NextFunct
             })
         }
             return res.status(200).json({
-                message: `Account rbalance retrieved successfully`,
+                message: `Account balance retrieved successfully`,
                 Data: {
                 account_number: account.account_number,
                 account_name: account.account_name,
@@ -218,14 +218,14 @@ export const getAccountBalance = async(req:Request, res:Response, next:NextFunct
 
 export const deleteAccount = async(req:Request, res:Response, next:NextFunction)=>{
     try{
-        const accountNumber = req.params.account_number
-        const confirm = await Account.findOne({where: {account_number:accountNumber}})
+        const accountsNumber = req.params.account_number
+        const confirm = await Account.findOne({where: {account_number:accountsNumber}})
         if(!confirm){
             return res.status(404).json({
                 message: `Account not found`
             })
         }
-        const deleteAccount = await Account.destroy({where:{account_number:accountNumber}})
+        const deleteAccount = await Account.destroy({where:{account_number:accountsNumber}})
         const check = await Account.findAll({})
         if(deleteAccount){
             return res.status(200).json({
@@ -241,3 +241,4 @@ export const deleteAccount = async(req:Request, res:Response, next:NextFunction)
       res.status(500).json({ Error: "Internal Server Error" });
     }
 }
+
