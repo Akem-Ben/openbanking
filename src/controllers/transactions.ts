@@ -36,6 +36,7 @@ receiver_account_number,
         transaction_status: "successful"
     })
     if(newTransaction){
+      findAccount.last_transaction_time = new Date()
         if(transaction_type === "debit"){
         findAccount.account_balance = findAccount.account_balance - amount
         }else if(transaction_type === "credit"){
@@ -56,3 +57,52 @@ receiver_account_number,
       res.status(500).json({ Error: "Internal Server Error" });
     }
   };
+
+export const getTransactionById = async(req:Request, res:Response, next:NextFunction) => {
+  try{
+  const idCheck = req.params.id;
+  const transaction = await Transaction.findOne({where: {id:idCheck}})
+  if(!transaction) return res.status(404).json({message: `Transaction not found`})
+  return res.status(200).json({message: `Transaction found`, data: transaction})
+  }catch (error:any) {
+    console.log(error.message)
+  res.status(500).json({ Error: "Internal Server Error" });
+}
+}
+
+export const getAllTransactions = async(req:Request, res:Response, next:NextFunction) => {
+  try{
+  let transactionz = await Transaction.findAll({})
+  if(!transactionz) return res.status(404).json({message: `Unable to fetch data`})
+  return res.status(200).json({message: `Transactions fetched`, data: transactionz})
+  }catch (error:any) {
+    console.log(error.message)
+  res.status(500).json({ Error: "Internal Server Error" });
+}
+}
+
+export const getTransactionsOfAUser = async(req:Request, res:Response, next:NextFunction) => {
+  try{
+    const accnt = req.params.id;
+    const userAccount = await Account.findOne({where: {account_number:accnt}})
+    if(!userAccount){
+      return res.status(404).json({
+        message: `Account does not exist`
+      })
+    }
+    const transactions = await Transaction.findAll({where: {sender_account_number:userAccount.account_number}})
+    if(!transactions){
+      return res.status(404).json({
+        message: `Transactions do not exist`
+      })
+    }
+    return res.status(200).json({
+      message: `Transactions successfully fetched`,
+      Account: userAccount,
+      data: transactions
+    })
+  }catch (error:any) {
+    console.log(error.message)
+  res.status(500).json({ Error: "Internal Server Error" });
+}
+}
