@@ -1,9 +1,11 @@
 import { Sequelize } from "sequelize";
-// import mysql2 from 'mysql2';
-// import mysql from 'mysql';
+import { DB_SCHEMA_NAME, DB_NAME, DB_PASSWORD } from '../configurations/configure'
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 
-const db = new Sequelize(`${process.env.DB_SCHEMA_NAME}`, `${process.env.DB_NAME}`, `${process.env.DB_PASSWORD}`, {
+const db = new Sequelize(DB_SCHEMA_NAME, DB_NAME, DB_PASSWORD, {
   host: 'localhost',
   dialect: 'mysql',
 });
