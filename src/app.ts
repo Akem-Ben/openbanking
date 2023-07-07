@@ -3,7 +3,10 @@ import cors from 'cors';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import db  from "./configurations/database";
-import accountRoutes from './routes/accountRoutes'
+import accountRoutes from './routes/accountRoutes';
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 
 const app = express();
