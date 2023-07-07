@@ -17,12 +17,16 @@ receiver_account_number,
   } = req.body;
 
   const findAccount = await Account.findOne({where: {account_number:sender_account_number}})
+
   if(!findAccount){
     return res.status(404).json({
         message: `Account does not exist`
     })
   }
-  let currentAccountBalance = findAccount.account_balance
+
+  let currentAccountBalance = findAccount.account_balance;
+  let newAccountBalance = 0;
+
     const newTransaction = await Transaction.create({
         id: idNew,
         amount,
@@ -35,23 +39,33 @@ receiver_account_number,
         transaction_date: new Date(),
         transaction_status: "successful"
     })
+
     if(newTransaction){
       findAccount.last_transaction_time = new Date()
+
         if(transaction_type === "debit"){
-        findAccount.account_balance = findAccount.account_balance - amount
+        newAccountBalance = currentAccountBalance - amount
         }else if(transaction_type === "credit"){
-        findAccount.account_balance = findAccount.account_balance + amount
+          newAccountBalance = currentAccountBalance + amount
         }
+
+        await findAccount.update({
+          account_balance: newAccountBalance
+        });
+
         return res.status(200).json({
             message: `Transaction successful`,
             account_name: findAccount.account_name,
             previous_account_balanace: currentAccountBalance,
             new_account_balanace: findAccount.account_balance,
+            findAccount,
             newTransaction
         })
+        
     }else{
         return res.status(401).json({transaction_status: 'unsuccessful'})
     }
+
     } catch (error:any) {
         console.log(error.message)
       res.status(500).json({ Error: "Internal Server Error" });
