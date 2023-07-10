@@ -6,55 +6,52 @@ import Account from '../models/accounts';
 export const createAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const idNew = v4();
-      const { account_name,
-        account_number,
+      const { first_name,
+        last_name,
+        bank_name,
         phone_number,
         email,
+        bvn,
         currency_code,
         account_type,
         status,
         account_balance } = req.body;
-      const account = await Account.findOne({
-        where: { account_number:account_number },
-      });
-      console.log(req.body)
       const setAccountNumber = await Account.findAll({});
       let newAccntNumber = 0;
       let accntArray = [];
       let maxAccnt = 0
-      let newBvn = 0
-      let maxBvn = 0
-      let bvnArray = [];
       if(setAccountNumber.length === 0){
-        newAccntNumber = 1234567890
-        newBvn = 2345678901
+        newAccntNumber = 1111111110
       } else{
         for(let i = 0; i<setAccountNumber.length; i++){
             accntArray.push(setAccountNumber[i].account_number)
-            bvnArray.push(setAccountNumber[i].bvn)
         }
-        maxBvn = Math.max(...bvnArray)
-        newBvn = maxBvn + 1
         maxAccnt = Math.max(...accntArray)
         newAccntNumber = maxAccnt + 1;
       }
-
+      const account = await Account.findOne({
+        where: { account_number:newAccntNumber },
+    });
+    if(account){
+        return res.status(400).json({
+            message: `Account already exists`
+        })
+    }
       if (!account) {
         const newUser = await Account.create({
           id: idNew,
-          account_name,
+          account_name: `${first_name} ${last_name}`,
           account_number: newAccntNumber,
-          bvn: newBvn,
+          bank_name,
+          bvn,
           phone_number,
           email,
           currency_code,
           account_opening_date: new Date(),
-          last_transaction_time: new Date(),
           account_type,
           status,
           account_balance
         });
-  
        return res.status(200).json({
           Message: "New Account created",
           newUser
@@ -70,7 +67,7 @@ export const createAccount = async (req: Request, res: Response, next: NextFunct
 
 export const getSingleAccount = async (req:Request, res:Response, next:NextFunction)=>{
     try{
-        const accountNumber = req.params.account_number
+        const accountNumber:any = req.query.account_number
         const findAccount = await Account.findOne({where: {account_number:accountNumber}})
         if(findAccount){
             return res.status(200).json({
@@ -192,8 +189,8 @@ export const reactivateAccount = async(req:Request, res:Response, next:NextFunct
 
 export const getAccountBalance = async(req:Request, res:Response, next:NextFunction)=>{
     try{
-        const accountNumber = req.params.account_number
-        const account = await Account.findOne({where: {account_number:accountNumber}})
+        const account_number:any = req.query.account_number
+        const account = await Account.findOne({where: {account_number:account_number}})
         if(!account){
             return res.status(404).json({
                 message: `Account not found`

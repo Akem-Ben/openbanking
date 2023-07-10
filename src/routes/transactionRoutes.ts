@@ -6,7 +6,7 @@ const router = express.Router();
 router.post('/create', createTransaction)
 router.get('/getbyid/:id', getTransactionById)
 router.get('/getall', getAllTransactions)
-router.get('/usertransaction/:id', getTransactionsOfAUser)
+router.get('/usertransaction/', getTransactionsOfAUser)
 router.delete('/delete/:id', deleteTransaction)
 
 export default router

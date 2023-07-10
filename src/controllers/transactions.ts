@@ -9,27 +9,41 @@ export const createTransaction = async (req: Request, res: Response, next: NextF
   const {
     amount,
     channel,
-transaction_type,
-narration,
-sender_account_number,
-currency_code,
-receiver_account_number,
+    transaction_type,
+    narration,
+    sender_account_number,
+    currency_code,
+    receiver_account_number,
   } = req.body;
 
-  const findAccount = await Account.findOne({where: {account_number:sender_account_number}})
-
-  if(!findAccount){
-    return res.status(404).json({
-        message: `Account does not exist`
-    })
+  let accountBalance;
+  let findAccount:any
+  let previousAccountBal;
+  if(transaction_type === 'credit'){
+  findAccount = await Account.findOne({where: {account_number: receiver_account_number}})
+  previousAccountBal = findAccount.account_balance
+  accountBalance = findAccount.account_balance + amount
+  findAccount.account_balance = accountBalance
+  } else {
+    findAccount = await Account.findOne({where: {account_number: sender_account_number}})
+    previousAccountBal = findAccount.account_balance
+  accountBalance = findAccount.account_balance - amount
+  findAccount.account_balance = accountBalance
   }
-  if(findAccount.status !== 'active')
-  return res.status(404).json({
-    message: `Account has been deactivated`
-})
+//   if(!findAccount){
+//     return res.status(404).json({
+//         message: `Sender's account does not exist`
+//     })
+//   }
 
-  let currentAccountBalance = findAccount.account_balance;
-  let newAccountBalance = 0;
+//   if(findAccount.status !== 'active')
+//   return res.status(404).json({
+//     message: `Account has been deactivated`
+// })
+
+  // let currentAccountBalance = findAccount.account_balance;
+  // let newAccountBalance = 0;
+
     const newTransaction = await Transaction.create({
         id: idNew,
         amount,
@@ -44,22 +58,14 @@ receiver_account_number,
     })
 
     if(newTransaction){
-      findAccount.last_transaction_time = new Date()
-
-        if(transaction_type === "debit"){
-        newAccountBalance = currentAccountBalance - amount
-        }else if(transaction_type === "credit"){
-          newAccountBalance = currentAccountBalance + amount
-        }
-
         await findAccount.update({
-          account_balance: newAccountBalance
+          account_balance: accountBalance
         });
 
         return res.status(200).json({
             message: `Transaction successful`,
             account_name: findAccount.account_name,
-            previous_account_balanace: currentAccountBalance,
+            previous_account_balanace: previousAccountBal,
             new_account_balanace: findAccount.account_balance,
             findAccount,
             newTransaction
@@ -100,15 +106,16 @@ export const getAllTransactions = async(req:Request, res:Response, next:NextFunc
 
 export const getTransactionsOfAUser = async(req:Request, res:Response, next:NextFunction) => {
   try{
-    const accnt = req.params.id;
+    const accnt:number = Number(req.query.account_number);
     const userAccount = await Account.findOne({where: {account_number:accnt}})
     if(!userAccount){
       return res.status(404).json({
         message: `Account does not exist`
       })
     }
-    const transactions = await Transaction.findAll({where: {sender_account_number:userAccount.account_number}})
-    if(!transactions){
+    const sentTransactions = await Transaction.findAll({where: {sender_account_number:userAccount.account_number}})
+    const receivedTransactions = await Transaction.findAll({where: {receiver_account_number: userAccount.account_number}})
+    if(!sentTransactions && !receivedTransactions){
       return res.status(404).json({
         message: `Transactions do not exist`
       })
@@ -116,7 +123,8 @@ export const getTransactionsOfAUser = async(req:Request, res:Response, next:Next
     return res.status(200).json({
       message: `Transactions successfully fetched`,
       Account: userAccount,
-      data: transactions
+      deposits: receivedTransactions,
+      withdrawals: sentTransactions
     })
   }catch (error:any) {
     console.log(error.message)
@@ -127,6 +135,12 @@ export const getTransactionsOfAUser = async(req:Request, res:Response, next:Next
 export const deleteTransaction = async(req:Request, res:Response, next:NextFunction) => {
   try{
     const transId = req.params.id;
+    const findTrans = await Transaction.findOne({where: {id:transId}})
+    if(!findTrans){
+      return res.status(404).json({
+        message: `Transaction not found`
+      })
+    }
     const del = await Transaction.destroy({where: {id:transId}})
     if(!del) return res.status(404).json({message: `Unable to delete`})
     const allTrans = await Transaction.findAll({})

@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../configurations/database";
+import Account from './accounts'
 
 export interface TransactionAtrributes {
   id: string;
@@ -32,11 +33,10 @@ Transaction.init(
   {
     id: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4
     },
     amount: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       channel: {
@@ -52,15 +52,16 @@ Transaction.init(
         allowNull: false,
       },
       sender_account_number: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false,
+        primaryKey: true,
       },
       currency_code: {
         type: DataTypes.STRING,
         allowNull: false,
       },
       receiver_account_number: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       transaction_date: {
@@ -79,6 +80,7 @@ Transaction.init(
   }
 
 );
+
 
 
 export default Transaction;
