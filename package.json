@@ -10,7 +10,7 @@
     "start": "node ./dist/app.js"
   },
   "engines": {
-    "node": ">=14 <15"
+    "node": ">=16.14.0"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",
