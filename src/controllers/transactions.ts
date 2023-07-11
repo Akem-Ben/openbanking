@@ -36,10 +36,10 @@ export const createTransaction = async (req: Request, res: Response, next: NextF
 //     })
 //   }
 
-//   if(findAccount.status !== 'active')
-//   return res.status(404).json({
-//     message: `Account has been deactivated`
-// })
+  if(findAccount.status !== 'active')
+  return res.status(404).json({
+    message: `Account has been deactivated`
+})
 
   // let currentAccountBalance = findAccount.account_balance;
   // let newAccountBalance = 0;
